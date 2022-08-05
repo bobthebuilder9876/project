@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import os
 
 from pyftpdlib.authorizers import DummyAuthorizer
