@@ -11,7 +11,7 @@ def main():
 
     # Define a new user having full r/w permissions and a read-only
     # anonymous user
-    authorizer.add_user('devuser', 'verysecurepassword1234', '.', perm='elradfmwMT')
+    authorizer.add_user('devuser', 'verysecurepassword1234', './data', perm='lr')
     authorizer.add_anonymous(os.getcwd())
 
     # Instantiate FTP handler class
