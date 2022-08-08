@@ -19,7 +19,11 @@ def ftp_connect():
     ftp.login()
 
 
-def search():
+def search_multi_day():
+    date_to_frame.tkraise(root)
+
+
+def search_just_day():
     return None
 
 
@@ -47,8 +51,19 @@ date_from.place(x=30, y=80)
 #to_input = Entry(root)
 #to_input.place(x=100, y=120)
 
-#search_btn = Button(root, text='Search', command=search())
-#search_btn.place(x=180, y=160)
+date_to = Label(root, text="To: ")
+date_to['font'] = font.Font(size=12)
+date_to.place(x=430, y=80)
+date_to_frame = Tk()
+date_to_frame.title("Date to")
+date_to_frame.resizable(width=FALSE, height=FALSE)
+date_to_frame.geometry("400x300")
+
+search_btn = Button(root, text='Search for just selected day', command=search_just_day())
+search_btn.place(x=180, y=320)
+
+search_btn_multi = Button(root, text='Search for a range starting with the selected day', command=search_multi_day())
+search_btn_multi.place(x=380, y=320)
 
 # Calendar input box
 cal_from = Calendar(root, selectmode = 'day',
