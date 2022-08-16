@@ -2,7 +2,7 @@ from getpass import getpass
 
 """Creates a config file in the same directory. Creates file if it doesn't exist. Allows user to set 5 different values each stored on a specific line in the file.
 The number entered to select a value corresponds to the line in the file that value is stored on. Line 0 is reserved for the 'last' variable used by the client
-(last pull from server), which is not alterable by the user here."""
+(last pull from server), which is not alterable by the user here and is empty by default."""
 
 while True:
     print("Enter a numeric character to configure its associated setting:")
