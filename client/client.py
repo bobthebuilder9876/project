@@ -5,9 +5,10 @@ import shutil
 import csv
 from datetime import datetime
 from time import sleep
+from .verify import name_valid, file_valid
 
-def validate(filename):
-    return ["error"]
+def toDateTime(filename):
+    return datetime(int(filename[9:13]), int(filename[13:15]), int(filename[15:17]), int(filename[17:19]), int(filename[19:21]), int(filename[21:23]))
 
 def writeCSV(logs, queue):
     try:
@@ -28,6 +29,10 @@ def main():
     user = "devuser" # PLACEHOLDER - Server username
     pswd = "verysecurepassword1234" # PLACEHOLDER - Server password
 
+    pullnow = False # PLACEHOLDER - Trigger manual data pull
+    pullstart = datetime(2022, 8, 5, 14, 25, 00) # PLACEHOLDER - Start of pull range
+    pullend = datetime(2022, 8, 12, 14, 25, 00) # PLACEHOLDER - End of pull range
+
     tmpdir = "tmp" # PLACEHOLDER - Working directory
     gooddir = "good" # PLACEHOLDER - Success directory
     baddir = "bad" # PLACEHOLDER - Fail directory
@@ -36,7 +41,7 @@ def main():
     logBuf = []
 
     while True:
-        if (datetime.now() - last).total_seconds() >= interval:
+        if pullnow or (datetime.now() - last).total_seconds() >= interval:
             try:
                 # Connect & Login
                 ftp = ftplib.FTP()
@@ -62,26 +67,46 @@ def main():
                     os.makedirs(baddir)
 
                 # Download CSVs from server
-                for filename in csvs:
-                    # Skip downloading if file with same name already exists in temporary files directory
-                    if os.path.exists(tmpdir + "/" + filename):
-                        continue
-                    with open(tmpdir + "/" + filename, "wb") as f:
-                        ftp.retrbinary("RETR " + "/" + filename, f.write)
+                i = 0
+                while i < len(csvs):
+                    success = False
+                    filename = csvs[i]
+                    if name_valid(filename):
+                        dt = toDateTime(filename)
+                        if (pullnow and dt >= pullstart and dt <= pullend) or datetime >= last:
+                            with open(tmpdir + "/" + filename, "wb") as f:
+                                ftp.retrbinary("RETR " + "/" + filename, f.write)
+                                i += 1
+                                csvs[i] = (filename, dt)
+                                success = True
+
+                    if not success:
+                        csvs.pop(i)
 
                 # Close connection
                 ftp.close()
 
-                for filename in csvs:
-                    errs = validate(filename)
+                for file in csvs:
+                    errs = file_valid(file[0])
+                    dtPath = "/" + str(file[1].year) + "/" + str(file[1].month) + "/" + str(file[1].day)
                     if errs == []:
-                        shutil.move(tmpdir + "/" + filename, gooddir + "/" + filename)
+                        try:
+                            shutil.move(tmpdir + "/" + file[0], gooddir + dtPath + "/" + file[0])
+                        except IOError as err:
+                            os.makedirs(gooddir + dtPath)
+                            shutil.move(tmpdir + "/" + file[0], gooddir + dtPath + "/" + file[0])
                     else:
-                        shutil.move(tmpdir + "/" + filename, baddir + "/" + filename)
+                        try:
+                            shutil.move(tmpdir + "/" + file[0], baddir + dtPath + "/" + file[0])
+                        except IOError as err:
+                            os.makedirs(baddir + dtPath)
+                            shutil.move(tmpdir + "/" + file[0], baddir + dtPath + "/" + file[0])
+
                         logBuf.append([filename] + errs);
 
-                # Update last download time
+                # Update last download time and disable forced pull
                 last = datetime.now()
+                pullnow = False
             # Bad response
             except ftplib.error_reply as e:
                 continue
