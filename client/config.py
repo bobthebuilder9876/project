@@ -1,5 +1,9 @@
 from getpass import getpass
 
+"""Creates a config file in the same directory. Creates file if it doesn't exist. Allows user to set 5 different values each stored on a specific line in the file.
+The number entered to select a value corresponds to the line in the file that value is stored on. Line 0 is reserved for the 'last' variable used by the client
+(last pull from server), which is not alterable by the user here."""
+
 while True:
     print("Enter a numeric character to configure its associated setting:")
     print("1 - regular FTP pull interval")
@@ -35,26 +39,18 @@ while True:
         break
 
     var=''
-
-    
-    #(interval)
     if (op == 1):
         var = input("Enter new interval (in seconds), or press enter to cancel: ")
-    #(host)
     if (op == 2):
         var = input("Enter new server host, or press enter to cancel: ")
-    #(port)
     if (op == 3):
         var = input("Enter new server port, or press enter to cancel: ")
-    #(user)
     if (op == 4):
         var = input("Enter new username, or press enter to cancel: ")
 
     #op corresponds to line of file to be changed  
-    lines[op] = (var + '\n')
-    #(line 0 of file is reserved for recording 'last' variable (last pull from server))      
+    lines[op] = (var + '\n')     
     
-    #(pswd)
     if (op == 5):
         #getpass doesn't work in idle, but would hide the user's input on the terminal
         var = getpass("Enter new password, or press enter to cancel: ")
