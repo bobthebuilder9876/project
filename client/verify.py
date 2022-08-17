@@ -69,11 +69,8 @@ def file_valid(file):
         return ["Missing Column"]
     if not unique_batch_id(data):
         lst.append("Duplicate ID")
-        print("ID")
     if not correct_header(data):
         lst.append("Incorrect Header")
-        print("header")
     if not suitable_values(data):
-        print("value")
         lst.append("Unsuitable Value")
     return(lst)
