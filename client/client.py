@@ -26,9 +26,11 @@ config = [None] * 10
 
 logBuf = []
 
+# Convert date/time in filename to datetime object
 def toDateTime(filename):
     return datetime(int(filename[9:13]), int(filename[13:15]), int(filename[15:17]), int(filename[17:19]), int(filename[19:21]), int(filename[21:23]))
 
+# Read Config File
 def readConfig():
     change = False
     try:
@@ -120,10 +122,16 @@ def readConfig():
     except:
         return False
 
+# Write Config File
 def writeConfig():
     with open("config.txt", "w") as file:
-        file.writelines(config)
+        out = config
+        out[0] = str(config[0].year + config[0].month + config[0].day + config[0].hour + config[0].minute + config[0].second)
+        out[1] = str(config[1])
+        out[3] = str(config[3])
+        file.writelines(out)
 
+# Read Manual Data Download Commands
 def readInstant():
     try:
         with open("daterange.csv", "r") as file:
@@ -139,7 +147,7 @@ def readInstant():
     except:
         return None
 
-
+# Save error logs to CSV
 def writeCSV(logs, queue):
     try:
         with open(logs, "a") as file:
@@ -150,9 +158,11 @@ def writeCSV(logs, queue):
     except:
         return
 
+
 def main():
     while True:
         instantPull = readInstant()
+        # Only pull from server if config is useable and (timer has fired or user requested data)
         if readConfig() and ((datetime.now() - config[0]).total_seconds() >= config[1] or instantPull != None):
             try:
                 # Connect & Login
@@ -183,31 +193,36 @@ def main():
                 while i < len(csvs):
                     success = False
                     filename = csvs[i]
+                    # Only download if filename is valid and file is new or was requested
                     if name_valid(filename):
                         dt = toDateTime(filename)
                         if (instantPull != None and dt >= instantPull[0] and dt <= instantPull[1]) or datetime >= config[0]:
+                            # Download file
                             with open(config[6] + "/" + filename, "wb") as f:
                                 ftp.retrbinary("RETR " + "/" + filename, f.write)
-                                i += 1
                                 csvs[i] = (filename, dt)
+                                i += 1
                                 success = True
 
+                    # Remove filenames not selected for download
                     if not success:
                         csvs.pop(i)
 
                 # Close connection
                 ftp.close()
 
-                # Check file is good and archive
+                # Check file is good and archive in yyyy/mm/dd directory
                 for file in csvs:
                     errs = file_valid(file[0])
                     dtPath = "/" + str(file[1].year) + "/" + str(file[1].month) + "/" + str(file[1].day)
+                    # No errors = Good
                     if errs == []:
                         try:
                             shutil.move(config[6] + "/" + file[0], config[7] + dtPath + "/" + file[0])
                         except IOError as err:
                             os.makedirs(config[7] + dtPath)
                             shutil.move(config[6] + "/" + file[0], config[7] + dtPath + "/" + file[0])
+                    # Errors = Bad
                     else:
                         try:
                             shutil.move(config[6] + "/" + file[0], config[8] + dtPath + "/" + file[0])
@@ -215,6 +230,7 @@ def main():
                             os.makedirs(config[8] + dtPath)
                             shutil.move(config[6] + "/" + file[0], config[8] + dtPath + "/" + file[0])
 
+                        # Store pending error logs in buffer
                         logBuf.append([filename] + errs);
 
                 # Update last download time and disable forced pull
@@ -242,7 +258,9 @@ def main():
         else:
             sleep(5)
 
+        # Write contents of error log buffer to file
         if len(logBuf) > 0:
             writeCSV(config[9], logBuf)
+            logBuf = []
 
 main()
