@@ -5,7 +5,8 @@ import shutil
 import csv
 from datetime import datetime, timedelta
 from time import sleep
-from .verify import name_valid, file_valid
+from verify import name_valid, file_valid
+import re
 
 config = [None] * 10
 
@@ -24,10 +25,6 @@ config = [None] * 10
 """
 
 logBuf = []
-
-pullnow = False # PLACEHOLDER - Trigger manual data pull
-pullstart = datetime(2022, 8, 5, 14, 25, 00) # PLACEHOLDER - Start of pull range
-pullend = datetime(2022, 8, 12, 14, 25, 00) # PLACEHOLDER - End of pull range-
 
 def toDateTime(filename):
     return datetime(int(filename[9:13]), int(filename[13:15]), int(filename[15:17]), int(filename[17:19]), int(filename[19:21]), int(filename[21:23]))
@@ -127,6 +124,22 @@ def writeConfig():
     with open("config.txt", "w") as file:
         file.writelines(config)
 
+def readInstant():
+    try:
+        with open("daterange.csv", "r") as file:
+            txt = file.read().split(',')
+            if len(txt) == 2:
+                if re.search("^[0-9]{4}((0[0-9])|(1[0-2]))(([0-2][0-9])|(3[0-1]))$", txt[0]) != None:
+                    txt[0] = datetime(txt[0:4], txt[4:6], txt[6:8], 0, 0, 0)
+
+                    if re.search("^[0-9]{4}((0[0-9])|(1[0-2]))(([0-2][0-9])|(3[0-1]))$", txt[1]) != None:
+                        txt[1] = datetime(txt[0:4], txt[4:6], txt[6:8], 23, 59, 59)
+                        return txt
+        return None
+    except:
+        return None
+
+
 def writeCSV(logs, queue):
     try:
         with open(logs, "a") as file:
@@ -139,8 +152,8 @@ def writeCSV(logs, queue):
 
 def main():
     while True:
-            
-        if readConfig() and (datetime.now() - config[0]).total_seconds() >= config[1]:
+        instantPull = readInstant()
+        if readConfig() and ((datetime.now() - config[0]).total_seconds() >= config[1] or instantPull != None):
             try:
                 # Connect & Login
                 ftp = ftplib.FTP()
@@ -172,7 +185,7 @@ def main():
                     filename = csvs[i]
                     if name_valid(filename):
                         dt = toDateTime(filename)
-                        if (pullnow and dt >= pullstart and dt <= pullend) or datetime >= config[0]:
+                        if (instantPull != None and dt >= instantPull[0] and dt <= instantPull[1]) or datetime >= config[0]:
                             with open(config[6] + "/" + filename, "wb") as f:
                                 ftp.retrbinary("RETR " + "/" + filename, f.write)
                                 i += 1
@@ -206,7 +219,6 @@ def main():
 
                 # Update last download time and disable forced pull
                 config[0] = datetime.now()
-                pullnow = False
             # Bad response
             except ftplib.error_reply as e:
                 continue
