@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from time import sleep
 from .verify import name_valid, file_valid
 
-config = [None] * 13
+config = [None] * 10
 
 """
 0 - Date/Time of last FTP pull
