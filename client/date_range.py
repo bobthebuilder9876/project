@@ -3,12 +3,18 @@ def get_date_range():
     start, end = "0","1"
     #Obtaining suitable start date
     while re.search("^[0-9]{4}((0[0-9])|(1[0-2]))(([0-2][0-9])|(3[0-1]))$", start) == None:
-        start = str(input("Please enter suitable start date in format YYYYMMDD: "))
+        start = str(input("Please enter suitable start date in format YYYYMMDD, or press enter to cancel: "))
+        if (start == ''):
+            print("Manual pull cancelled.\n")
+            return
         if re.search("^[0-9]{4}((0[0-9])|(1[0-2]))(([0-2][0-9])|(3[0-1]))$", start) == None:
             print("Error: Unsuitable Format")
     #Obtaining suitable end date
     while re.search("^[0-9]{4}((0[0-9])|(1[0-2]))(([0-2][0-9])|(3[0-1]))$", end) == None:
-        end = str(input("Please enter suitable end date in format YYYYMMDD: "))
+        end = str(input("Please enter suitable end date in format YYYYMMDD, or press enter to cancel: "))
+        if (end == ''):
+            print("Manual pull cancelled.\n")
+            return
         if re.search("^[0-9]{4}((0[0-9])|(1[0-2]))(([0-2][0-9])|(3[0-1]))$", end) == None:
             print("Error: Unsuitable Format")
     #Checking if start date is after end
@@ -24,4 +30,4 @@ def get_date_range():
         f = open("daterange.csv","w")
         f.write(string)
         f.close()
-
+        print("Request set.\n")
