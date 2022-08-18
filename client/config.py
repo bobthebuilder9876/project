@@ -17,18 +17,21 @@ while True:
     print("7 - validated data directory")
     print("8 - invalidated data directory")
     print("9 - log file")
-    print("0 - request manual data pull\n")
+    print("0 - request manual data pull")
     print("(press enter to cancel)\n")
+    op = input()
+    
+    #(exit program)
+    if (op == ''):
+        print("Exiting...")
+        break
 
     #validate input
     try:
-        op = int(input(""))
+        op = int(op)
     except ValueError:
         print("Invalid input.\n")
         continue
-    """if not (0<=op and op<=9):
-        print("Invalid input.\n")
-        continue"""
 
     #record config file in current state
     with open("config.txt", 'a+') as file:
@@ -40,10 +43,6 @@ while True:
             for i in range (9-linesNo):
                 lines.append('\n')
             lines.append('')
-
-    #(exit program)
-    if (op == 0):
-        break
 
     var=''
     if (op == 1):
@@ -81,7 +80,7 @@ while True:
             print("File write cancelled.\n")
             continue
         if not (os.path.isfile(var)) or (var.isspace()):
-            print("\File does not exist.\n")
+            print("\nFile does not exist.\n")
             continue
         lines[op] = var
         
