@@ -16,8 +16,8 @@ while True:
     print("6 - data processing directory")
     print("7 - validated data directory")
     print("8 - invalidated data directory")
-    print("9 - request manual data pull")
-    print("0 - (logs.csv)\n")
+    print("9 - log file")
+    print("0 - request manual data pull\n")
     print("(press enter to cancel)\n")
 
     #validate input
@@ -36,8 +36,8 @@ while True:
         lines = file.readlines()
         linesNo = len(lines)
         #if latter fields are blank, add newlines to avoid index error
-        if (linesNo<9):
-            for i in range (8-linesNo):
+        if (linesNo<10):
+            for i in range (9-linesNo):
                 lines.append('\n')
             lines.append('')
 
@@ -57,35 +57,35 @@ while True:
     if (op == 5):
         #getpass doesn't work in idle, but would hide the user's input on the terminal
         var = getpass("Enter new password, or press enter to cancel: ")
-    if (op == 6 or op == 7):
+        
+    if (6<=op and op<=8):
         if (op == 6):
-            var = input("Enter name for the directory where data will be processed, or press enter to cancel: ")
+            var = input("Enter name of the directory where data will be processed, or press enter to cancel: ")
         if (op == 7):
-            var = input("Enter name for the directory where validated data will be stored, or press enter to cancel: ")
+            var = input("Enter name of the directory where validated data will be stored, or press enter to cancel: ")
+        if (op == 8):
+            var = input("Enter name of the directory where invalidated data will be stored, or press enter to cancel: ")
         if (var==''):
             print("File write cancelled.\n")
             continue
         if not (os.path.isdir(var)) or (var.isspace()):
             print("\nDirectory does not exist.\n")
             continue
-
-        var = "./" + var
         
     #op corresponds to line of file to be changed 
-    lines[op] = (var + '\n') 
-    
-    if (op == 8):
-        var = input("Enter name for the directory where invalidated data will be stored, or press enter to cancel: ")
+    lines[op] = var + '\n'
+
+    if (op == 9):
+        var = input("Enter name of the file where error logs will be stored (including extension), or press enter to cancel: ")
         if (var==''):
             print("File write cancelled.\n")
             continue
-        if not (os.path.isdir(var)) or (var.isspace()):
-            print("\nDirectory does not exist.\n")
+        if not (os.path.isfile(var)) or (var.isspace()):
+            print("\File does not exist.\n")
             continue
-        var = "./" + var
         lines[op] = var
         
-    if (op == 9):
+    if (op == 0):
         get_date_range()
         continue
 
@@ -93,7 +93,6 @@ while True:
     if (var == ''):
         print("File write cancelled.\n")
         continue
-
     
     #write to file with user's alteration
     with open('config.txt', 'w+') as file:
@@ -101,4 +100,3 @@ while True:
             file.write(line)
 
     print('')
-
