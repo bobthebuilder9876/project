@@ -32,15 +32,17 @@ def toDateTime(filename):
 def readConfig():
     change = False
     try:
+        # Read config file
         file = open("config.txt", "r")
         lines = file.readlines()
         if len(lines) < len(config):
+            # Populate missing lines with empty strings
             lines += [""] * (len(config) - len(lines))
         file.close()
 
+        # Populate config list (see above for contents details)
         for counter in range(len(config)):
             lines[counter] = lines[counter].strip()
-
             match counter:
                 case 0:
                     try:
@@ -130,6 +132,7 @@ def readConfig():
                             change = True
 
 
+        # If config was changed, save changes
         if change:
             writeConfig()
         return True
@@ -140,6 +143,7 @@ def readConfig():
 # Write Config File
 def writeConfig():
     with open("config.txt", "w") as file:
+        # Stringify non-string data
         out = config.copy()
         out[0] = config[0].strftime("%Y%m%d%H%M%S")
         out[1] = str(config[1])
@@ -154,9 +158,11 @@ def readInstant():
         with open("daterange.csv", "r") as file:
             txt = file.read().split(',')
             if len(txt) == 2:
+                # Start date
                 if re.search("^[0-9]{4}((0[0-9])|(1[0-2]))(([0-2][0-9])|(3[0-1]))$", txt[0]) != None:
                     txt[0] = datetime(txt[0:4], txt[4:6], txt[6:8], 0, 0, 0)
 
+                    # End date
                     if re.search("^[0-9]{4}((0[0-9])|(1[0-2]))(([0-2][0-9])|(3[0-1]))$", txt[1]) != None:
                         txt[1] = datetime(txt[0:4], txt[4:6], txt[6:8], 23, 59, 59)
                         return txt
