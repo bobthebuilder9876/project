@@ -1,4 +1,7 @@
 # Data Directories
-tmp
-bad
-good
+*/tmp
+*/bad
+*/good
+*/logs.csv
+*/daterange.csv
+*/config.txt
