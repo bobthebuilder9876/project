@@ -1,7 +1,12 @@
 # Data Directories
+tmp
+bad
+good
 */tmp
 */bad
 */good
+
+# Generated Files
 */logs.csv
 */daterange.csv
 */config.txt
