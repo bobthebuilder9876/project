@@ -155,17 +155,20 @@ def writeConfig():
 # Read Manual Data Download Commands
 def readInstant():
     try:
-        with open("daterange.csv", "r") as file:
-            txt = file.read().split(',')
-            if len(txt) == 2:
-                # Start date
-                if re.search("^[0-9]{4}((0[0-9])|(1[0-2]))(([0-2][0-9])|(3[0-1]))$", txt[0]) != None:
-                    txt[0] = datetime(txt[0:4], txt[4:6], txt[6:8], 0, 0, 0)
+        file = open("daterange.csv", "r")
+        txt = file.read().split(',')
+        file.close()
+        
+        if len(txt) == 2:
+            # Start date
+            if re.search("^[0-9]{4}((0[0-9])|(1[0-2]))(([0-2][0-9])|(3[0-1]))$", txt[0]) != None:
+                txt[0] = datetime(int(txt[0][0:4]), int(txt[0][4:6]), int(txt[0][6:]), 0, 0, 0)
 
-                    # End date
-                    if re.search("^[0-9]{4}((0[0-9])|(1[0-2]))(([0-2][0-9])|(3[0-1]))$", txt[1]) != None:
-                        txt[1] = datetime(txt[0:4], txt[4:6], txt[6:8], 23, 59, 59)
-                        return txt
+                # End date
+                if re.search("^[0-9]{4}((0[0-9])|(1[0-2]))(([0-2][0-9])|(3[0-1]))$", txt[1]) != None:
+                    txt[1] = datetime(int(txt[1][0:4]), int(txt[1][4:6]), int(txt[1][6:]), 23, 59, 59)
+                    os.remove("daterange.csv")
+                    return txt
         return None
     except:
         return None
