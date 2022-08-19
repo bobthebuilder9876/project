@@ -6,6 +6,7 @@ from datetime import datetime
 LARGEFONT = ("Verdana", 20)
 SMALLFONT = ("Verdana", 14)
 VSMALLFONT = ("Verdana", 10)
+FORMAT = "%d-%m-%Y"
 
 
 class tkinterApp(tk.Tk):
@@ -79,21 +80,30 @@ class Results(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        label = ttk.Label(self, text="Page 1", font=LARGEFONT)
+        label = ttk.Label(self, text="Correct data from the specified range has been requested for download",
+                          font=SMALLFONT)
         label.grid(row=0, column=4, padx=10, pady=10)
 
     # this method validates whether the data is in the correct format
     def checkValInput(self, date):
-        format = "%d-%m-%Y"
         # checking if format matches the date
         res = True
 
         # using try-except to check for truth value
         try:
-            res = bool(datetime.strptime(date, format))
+            res = bool(datetime.strptime(date, FORMAT))
         except ValueError:
             res = False
         return res
+
+    # retrieve the required data from the server, if only searching for one day, dateFrom==dateTo
+    def getData(self, dateFrom, dateTo):
+        start = datetime.strftime(dateFrom, '%Y%m%d')
+        end = datetime.strftime(dateTo, '%Y%m%d')
+        string = start + "," + end
+        f = open("daterange.csv", "w")
+        f.write(string)
+        f.close()
 
     # when the user searches for a single day, the value of the date is passed to this method
     def searchSingle(self, date, cont, errLbl):
@@ -101,8 +111,8 @@ class Results(tk.Frame):
             errLbl.config(text='Date is in wrong format, should be e.g., 01-01-2000')
             cont.show_frame(SingleDay)
         else:
-            format = "%d-%m-%Y"
-            dateF = datetime.strptime(date, format)
+            dateF = datetime.strptime(date, FORMAT)
+            self.getData(self, dateF, dateF)
 
     def searchMulti(self, dateFrom, dateTo, cont, errLbl):
         # first check the data is of the right format
@@ -111,16 +121,15 @@ class Results(tk.Frame):
             cont.show_frame(MultiDay)
         else:
             # convert the dates to the date format
-            format = "%d-%m-%Y"
-            dateFromF = datetime.strptime(dateFrom, format)
-            dateToF = datetime.strptime(dateTo, format)
+            dateFromF = datetime.strptime(dateFrom, FORMAT)
+            dateToF = datetime.strptime(dateTo, FORMAT)
 
             # compare the dates to check that the from date isn't after the to
             if dateFromF > dateToF:
                 errLbl.config(text='Date from should be less than or equal to date to')
                 cont.show_frame(MultiDay)
             else:
-                
+                self.getData(self, dateFromF, dateToF)
 
 
 class SingleDay(tk.Frame):
