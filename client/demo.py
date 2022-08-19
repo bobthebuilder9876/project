@@ -96,51 +96,64 @@ class Results(tk.Frame):
         return res
 
     # when the user searches for a single day, the value of the date is passed to this method
-    def searchSingle(self, date, cont):
+    def searchSingle(self, date, cont, errLbl):
         if not self.checkValInput(self, date):
+            errLbl.config(text='Date is in wrong format, should be e.g., 01-01-2000')
             cont.show_frame(SingleDay)
+        else:
+            format = "%d-%m-%Y"
+            dateF = datetime.strptime(date, format)
 
-        format = "%d-%m-%Y"
-        dateF = datetime.strptime(date, format)
-
-    def searchMulti(self, dateFrom, dateTo, cont):
+    def searchMulti(self, dateFrom, dateTo, cont, errLbl):
         # first check the data is of the right format
         if not (self.checkValInput(self, dateFrom) and self.checkValInput(self, dateTo)):
+            errLbl.config(text='Date is in wrong format, should be e.g., 01-01-2000')
             cont.show_frame(MultiDay)
+        else:
+            # convert the dates to the date format
+            format = "%d-%m-%Y"
+            dateFromF = datetime.strptime(dateFrom, format)
+            dateToF = datetime.strptime(dateTo, format)
 
-        # convert the dates to the date format
-        format = "%d-%m-%Y"
-        dateFromF = datetime.strptime(dateFrom, format)
-        dateToF = datetime.strptime(dateTo, format)
-
-        # compare the dates to check that the from date isn't after the to
-        if dateFromF > dateToF:
-            cont.show_frame(MultiDay)
+            # compare the dates to check that the from date isn't after the to
+            if dateFromF > dateToF:
+                errLbl.config(text='Date from should be less than or equal to date to')
+                cont.show_frame(MultiDay)
+            else:
+                
 
 
 class SingleDay(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        # the labels, buttons, and entries that make up the frame. They are arranged using the grid structure
         label = ttk.Label(self, text="Search for single day", font=LARGEFONT)
         label.grid(row=0, column=4, padx=10, pady=10)
+        errorLabel = ttk.Label(self, font=VSMALLFONT, foreground='red')
+        errorLabel.grid(row=2, column=4, padx=10, pady=10)
         label2 = ttk.Label(self, text="Date", font=SMALLFONT)
         label2.grid(row=1, column=1, padx=10, pady=10)
         dateEntry = ttk.Entry(self)
         dateEntry.grid(row=1, column=2, padx=10, pady=10)
+        # the search button, switches tab and calls a function in the results frame to check the data passed
         searchBtn = ttk.Button(self, text="Search",
                                command=lambda: [controller.show_frame(Results),
-                                                Results.searchSingle(Results, dateEntry.get(), controller)])
+                                                Results.searchSingle(Results, dateEntry.get(), controller, errorLabel)])
         searchBtn.grid(row=1, column=3, padx=10, pady=10)
         inputDscr = ttk.Label(self, text="Enter date in format %d-%m-%Y", font=VSMALLFONT)
         inputDscr.grid(row=1, column=4, padx=10, pady=10)
+
 
 class MultiDay(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        # the labels, buttons, and entries that make up the frame. They are arranged using the grid structure
         label = ttk.Label(self, text="Search for data in a range", font=LARGEFONT)
         label.grid(row=0, column=4, padx=10, pady=10)
+        errorLabel = ttk.Label(self, font=VSMALLFONT, foreground='red')
+        errorLabel.grid(row=3, column=4, padx=10, pady=10)
         label2 = ttk.Label(self, text="Date from", font=SMALLFONT)
         label2.grid(row=1, column=1, padx=10, pady=10)
         dateFrom = ttk.Entry(self)
@@ -149,9 +162,10 @@ class MultiDay(tk.Frame):
         label3.grid(row=2, column=1, padx=10, pady=10)
         dateTo = ttk.Entry(self)
         dateTo.grid(row=2, column=2, padx=10, pady=10)
+        # the search button, switches tab and calls a function in the results frame to check the data passed
         searchBtn = ttk.Button(self, text="Search",
                                command=lambda: [controller.show_frame(Results),
-                                                Results.searchMulti(Results, dateFrom.get(), dateTo.get(), controller)])
+                                                Results.searchMulti(Results, dateFrom.get(), dateTo.get(), controller, errorLabel)])
         searchBtn.grid(row=2, column=3, padx=10, pady=10)
         inputDscr = ttk.Label(self, text="Enter date in format %d-%m-%Y", font=VSMALLFONT)
         inputDscr.grid(row=1, column=4, padx=10, pady=10)
