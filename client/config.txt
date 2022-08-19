@@ -1,0 +1,9 @@
+
+10
+127.0.0.1
+21
+devuser
+verysecurepassword1234
+tmp
+good
+bad

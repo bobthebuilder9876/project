@@ -24,8 +24,6 @@ config = [None] * 10
 
 """
 
-logBuf = []
-
 # Convert date/time in filename to datetime object
 def toDateTime(filename):
     return datetime(int(filename[9:13]), int(filename[13:15]), int(filename[15:17]), int(filename[17:19]), int(filename[19:21]), int(filename[21:23]))
@@ -34,102 +32,121 @@ def toDateTime(filename):
 def readConfig():
     change = False
     try:
-        with open("config.txt", "r") as file:
-            lines = file.readlines()
-            for counter in range(len(lines)):
-                match counter:
-                    case 0:
-                        try:
-                            if (len(lines[counter]) == 14):
-                                dt = int(lines[counter])
-                                config[counter] = datetime(lines[counter][0:4], lines[counter][4:6], lines[counter][6:8], lines[counter][8:10], lines[counter][10:12], lines[counter][12:14])
-                            else:
-                                raise ValueError
-                        except ValueError:
-                            config[counter] = datetime.now() - timedelta(seconds=config[1])
-                            change = True
-                    case 1:
-                        try:
-                            config[counter] = int(lines[counter])
-                        except ValueError:
-                            config[counter] = 10
-                            change = True
-                    case 2:
-                        eles = lines[counter].split(".")
-                        try:
-                            if len(eles) == 4:
-                                for each in eles:
-                                    if int(each) > 255 or int(each) < 0:
-                                        raise ValueError
+        file = open("config.txt", "r")
+        lines = file.readlines()
+        if len(lines) < len(config):
+            lines += [""] * (len(config) - len(lines))
+        file.close()
 
-                                config[counter] = lines[counter]
-                            else:
-                                raise ValueError
-                        except ValueError:
-                            config[counter] = "127.0.0.1"
-                            change = True
-                    case 3:
-                        try:
-                            config[counter] = int(lines[counter])
-                        except ValueError:
-                            config[counter] = 21
-                            change = True
-                    case 4:
-                        config[counter] = lines[counter]
-                    case 5:
-                        config[counter] = lines[counter]
-                    case 6:
-                        config[counter] = lines[counter]
-                        if (not os.path.isdir(config[counter])):
-                            try:
-                                os.makedirs(config[counter])
-                            except:
-                                config[counter] = "tmp"
-                                os.makedirs(config[counter])
-                                change = True
+        for counter in range(len(config)):
+            lines[counter] = lines[counter].strip()
 
-                    case 7:
-                        config[counter] = lines[counter]
-                        if (not os.path.isdir(config[counter])):
-                            try:
+            match counter:
+                case 0:
+                    try:
+                        if (len(lines[counter]) == 14):
+                            config[counter] = datetime(int(lines[counter][0:4]), int(lines[counter][4:6]), int(lines[counter][6:8]), int(lines[counter][8:10]), int(lines[counter][10:12]), int(lines[counter][12:]))
+                        else:
+                            raise ValueError
+                    except ValueError:
+                        config[counter] = datetime(1, 1, 1, 0, 0, 0)
+                        change = True
+                case 1:
+                    try:
+                        config[counter] = int(lines[counter])
+                    except ValueError:
+                        config[counter] = 10
+                        change = True
+                case 2:
+                    eles = lines[counter].split(".")
+                    try:
+                        if len(eles) == 4:
+                            for each in eles:
+                                if int(each) > 255 or int(each) < 0:
+                                    raise ValueError
+
+                            config[counter] = lines[counter]
+                        else:
+                            raise ValueError
+                    except ValueError:
+                        config[counter] = "127.0.0.1"
+                        change = True
+                case 3:
+                    try:
+                        config[counter] = int(lines[counter])
+                    except ValueError:
+                        config[counter] = 21
+                        change = True
+                case 4:
+                    config[counter] = lines[counter]
+                case 5:
+                    config[counter] = lines[counter]
+                case 6:
+                    config[counter] = lines[counter]
+                    if (not os.path.isdir(config[counter])):
+                        try:
+                            os.makedirs(config[counter])
+                            if (config[counter] in ["", ".", ".."]):
+                                raise ValueError
+                        except:
+                            config[counter] = "tmp"
+                            if (not os.path.isdir(config[counter])):
                                 os.makedirs(config[counter])
-                            except:
-                                config[counter] = "good"
+                            change = True
+
+                case 7:
+                    config[counter] = lines[counter]
+                    if (not os.path.isdir(config[counter])):
+                        try:
+                            os.makedirs(config[counter])
+                            if (config[counter] in ["", ".", ".."]):
+                                raise ValueError
+                        except:
+                            config[counter] = "good"
+                            if (not os.path.isdir(config[counter])):
                                 os.makedirs(config[counter])
-                                change = True
-                    case 8:
-                        config[counter] = lines[counter]
-                        if (not os.path.isdir(config[counter])):
-                            try:
+                            change = True
+                case 8:
+                    config[counter] = lines[counter]
+                    if (not os.path.isdir(config[counter])):
+                        try:
+                            os.makedirs(config[counter])
+                            if (config[counter] in ["", ".", ".."]):
+                                raise ValueError
+                        except:
+                            config[counter] = "bad"
+                            if (not os.path.isdir(config[counter])):
                                 os.makedirs(config[counter])
-                            except:
-                                config[counter] = "bad"
-                                os.makedirs(config[counter])
-                                change = True
-                    case 9:
-                        config[counter] = lines[counter]
-                        if (not os.path.exists(config[counter])):
-                            try:
+                            change = True
+                case 9:
+                    config[counter] = lines[counter]
+                    if (not os.path.isdir(os.path.dirname(config[counter]))):
+                        try:
+                            os.makedirs(os.path.dirname(config[counter]))
+                        except:
+                            config[counter] = "./logs.csv"
+                            if (not os.path.isdir(os.path.dirname(config[counter]))):
                                 os.makedirs(os.path.dirname(config[counter]))
-                            except:
-                                config[counter] = "logs.csv"
-                                change = True
+                            change = True
 
 
         if change:
             writeConfig()
         return True
-    except:
+    except OSError as e:
+        print(e)
         return False
 
 # Write Config File
 def writeConfig():
     with open("config.txt", "w") as file:
-        out = config
-        out[0] = str(config[0].year + config[0].month + config[0].day + config[0].hour + config[0].minute + config[0].second)
+        out = config.copy()
+        out[0] = config[0].strftime("%Y%m%d%H%M%S")
         out[1] = str(config[1])
         out[3] = str(config[3])
-        file.writelines(out)
+
+        for each in out:
+            file.write(each + "\n")
 
 # Read Manual Data Download Commands
 def readInstant():
@@ -150,16 +167,18 @@ def readInstant():
 # Save error logs to CSV
 def writeCSV(logs, queue):
     try:
-        with open(logs, "a") as file:
+        with open(logs, "a+") as file:
             writer = csv.writer(file)
-            while len(queue) > 0:
-                writer.write(queue[0])
-                queue.pop(0)
-    except:
+            writer.writerows(queue)
+            queue.clear()
+    except Exception as e:
+        print(e)
         return
 
 
 def main():
+    logBuf = []
+
     while True:
         instantPull = readInstant()
         # Only pull from server if config is useable and (timer has fired or user requested data)
@@ -196,7 +215,7 @@ def main():
                     # Only download if filename is valid and file is new or was requested
                     if name_valid(filename):
                         dt = toDateTime(filename)
-                        if (instantPull != None and dt >= instantPull[0] and dt <= instantPull[1]) or datetime >= config[0]:
+                        if (instantPull != None and dt >= instantPull[0] and dt <= instantPull[1]) or dt >= config[0]:
                             # Download file
                             with open(config[6] + "/" + filename, "wb") as f:
                                 ftp.retrbinary("RETR " + "/" + filename, f.write)
@@ -213,7 +232,7 @@ def main():
 
                 # Check file is good and archive in yyyy/mm/dd directory
                 for file in csvs:
-                    errs = file_valid(file[0])
+                    errs = file_valid(config[6] + "/" + file[0])
                     dtPath = "/" + str(file[1].year) + "/" + str(file[1].month) + "/" + str(file[1].day)
                     # No errors = Good
                     if errs == []:
@@ -231,36 +250,40 @@ def main():
                             shutil.move(config[6] + "/" + file[0], config[8] + dtPath + "/" + file[0])
 
                         # Store pending error logs in buffer
-                        logBuf.append([filename] + errs);
+                        logBuf.append([file[0]] + errs);
 
                 # Update last download time and disable forced pull
                 config[0] = datetime.now()
+                writeConfig()
             # Bad response
             except ftplib.error_reply as e:
+                print(e)
                 continue
             # Temporary error
             except ftplib.error_temp as e:
+                print(e)
                 continue
             # Permanent error
             except ftplib.error_perm as e:
-                code = str(e)[:3]
-                if code == "530": # Auth failed
-                    print("Invalid login details.")
-                else:
-                    raise e
+                print(e)
+                continue
             # Unknown error
             except ftplib.error_proto as e:
+                print(e)
                 continue
-            except OSError:
+            except OSError as e:
+                print(e)
                 continue
-            except EOFError:
+            except EOFError as e:
+                print(e)
                 continue
-        else:
-            sleep(5)
 
         # Write contents of error log buffer to file
         if len(logBuf) > 0:
             writeCSV(config[9], logBuf)
             logBuf = []
+
+        # Wait 5 secs before trying again
+        sleep(5)
 
 main()
